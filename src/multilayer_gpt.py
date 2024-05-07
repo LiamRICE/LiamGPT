@@ -75,13 +75,14 @@ Returns:
     _type_: _description_
 """
 class MultiLayerTransformerDecoder(nn.Module):
-    def __init__(self, vocab_size, embed_dim, num_heads, ff_hidden_layer, dropout, num_layers):
+    def __init__(self, vocab_size, embed_dim, num_heads, ff_hidden_layer, dropout, num_layers, device = "cpu"):
         super(MultiLayerTransformerDecoder, self).__init__()
         
+        self.device = device
         self.embedding = nn.Embedding(vocab_size, embed_dim)
         self.pos_encoder = PositionalEncoding(embed_dim, dropout)
         self.transformer_blocks = nn.ModuleList([
-            DecoderBlock(embed_dim, num_heads, ff_hidden_layer, dropout)
+            DecoderBlock(embed_dim, num_heads, ff_hidden_layer, dropout, device)
             for _ in range(num_layers)
         ])
         self.linear = nn.Linear(embed_dim, vocab_size)
@@ -91,7 +92,7 @@ class MultiLayerTransformerDecoder(nn.Module):
         x = self.embedding(x)
         x = self.pos_encoder(x)
         for transformer_block in self.transformer_blocks:
-            target_mask = generate_square_mask(x, target_mask)
+            target_mask = generate_square_mask(x.size(0)).to(self.device)
             x = transformer_block(x, target_mask)
         output = self.linear(x)
         output = self.softmax(output)
