@@ -31,16 +31,8 @@ print(f"the model has {gpt.count_params(model):,} trainable parameters")
 
 output = model(input_tensor)
 
-# Convert the log probabilities to probabilities for the first sequence in the batch and the first position in the sequence
-distribution = torch.exp(output[0, 0, :])
+print(output.size)
 
-# Convert the output tensor to numpy array
-distribution = distribution.detach().cpu().numpy()
+print(model)
 
-# Now plot the distribution
-plt.figure(figsize=(12, 6))
-plt.bar(np.arange(vocab_size), distribution)
-plt.xlabel("Word Index")
-plt.ylabel("Probability")
-plt.title("Output Distribution over Vocabulary")
-plt.show()
+
