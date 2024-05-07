@@ -4,8 +4,6 @@ import torch.nn.functional as F
 import math
 import time
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 
 """_summary_
 
@@ -58,7 +56,34 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(0), :]
         return self.dropout(x)
 
+"""_summary_
+"""
+def generate_square_mask(size):
+    # create a mask to prevent attention to future positions
+    mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)
+    mask = mask.float().masked_fill(mask == 0, float('-inf')).masked_fill(mask == 1, float(0.0))
+    return mask
 
+"""_summary_
+"""
+class TransformerDecoder(nn.Module):
+    def __init__(self, vocab_size, d_model, num_heads, ff_hidden_layer, dropout, max_len=5000):
+        super(TransformerDecoder, self).__init__()
+        
+        self.embedding = nn.Embedding(vocab_size, d_model)
+        self.pos_encoder = PositionalEncoding(d_model, dropout, max_len)
+        self.transformer_block = DecoderBlock(d_model, num_heads, ff_hidden_layer, dropout)
+        self.linear = nn.Linear(d_model, vocab_size)
+        self.softmax = nn.LogSoftmax(dim=1)
+    
+    def forward(self, x):
+        x = self.embedding(x)
+        x = self.pos_encoder(x)
+        target_mask = generate_square_mask(x.size(0))
+        x = self.transformer_block(x, target_mask)
+        output = self.linear(x)
+        output = self.softmax(output)
+        return output
 
 
 
