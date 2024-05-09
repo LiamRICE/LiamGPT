@@ -27,11 +27,19 @@ dropout = 0.1
 num_layers = 16
 context_length = 1024
 
+# reading source data
 text = dataset_tools.read_file("input.txt")
-n_vocab, encode, decode = dataset_tools.byte_pair_encoding()
 
-x, y = dataset_tools.get_batch(encode(text), block_size, batch_size, device)
+# generating encoding and decoding functions
+n_vocab, encode, decode = dataset_tools.byte_pair_encoding(device)
 
+# encoding data
+data = encode(text)
+
+# batching data
+x, y = dataset_tools.get_batch(data, block_size, batch_size, device)
+
+# generating context targets for pretraining
 dataset_tools.get_context_target(x, y, block_size, batch_size)
 
 

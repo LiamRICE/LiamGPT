@@ -18,29 +18,29 @@ def get_batch(source, block_size, batch_size, device="cpu"):
 
 def get_context_target(xb, yb, block_size, batch_size):
     for b in range(batch_size):
-        print(f"\n=== batch {b}:")
         for t in range(block_size):
             context = xb[b,:t+1]
             target = yb[b,t]
-            print(f"for input {context.tolist()} target is {target.tolist()}")
 
-def simple_encoding(text):
+def simple_encoding(text, device):
     chars = sorted(list(set(text)))
     # string-to-int (stoi) and int-to-string (itos) dictionaries
     stoi = {ch:i for i,ch in enumerate(chars)}
     itos = {i:ch for i,ch in enumerate(chars)}
     # create encode and decode functions
-    encode = lambda x: torch.tensor([stoi[ch] for ch in x], dtype=torch.long)
-    decode = lambda x: ''.join([itos[i] for i in x.tolist()])
+    encode = lambda x: torch.tensor([stoi[ch] for ch in x], dtype=torch.long).to(device)
+    decode = lambda x: ''.join([itos[i] for i in x.tolist()]).to(device)
     # get vocab_size
     vocab_size = len(stoi)
     return vocab_size, encode, decode
 
-def byte_pair_encoding():
+def byte_pair_encoding(device):
     # get encoding model
     enc = tiktoken.encoding_for_model("gpt-4")
+    encode = lambda x: torch.Tensor(enc.encode(x)).to(device)
+    decode = lambda x: torch.Tensor(enc.decode(x)).to(device)
     # return vocabulary size, encoding and decoding functions
-    return enc.n_vocab, enc.encode, enc.decode
+    return enc.n_vocab, encode, decode
 
 
 """
