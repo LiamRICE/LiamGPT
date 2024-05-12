@@ -1,5 +1,7 @@
+import sklearn.model_selection
 import torch
 import tiktoken
+import sklearn
 
 def read_file(filename):
     file = "./data/" + filename
@@ -7,6 +9,14 @@ def read_file(filename):
     with open(file) as f:
         text = f.read()
     return text
+
+def split_filter_train_examples(text):
+    text = text.split('\n')
+    final_text = []
+    for t in text:
+        if not t == '':
+            final_text.append(t)
+    return final_text
 
 def get_batch(source, block_size, batch_size, device="cpu"):
     # source is an iterable
@@ -21,6 +31,7 @@ def get_context_target(xb, yb, block_size, batch_size):
         for t in range(block_size):
             context = xb[b,:t+1]
             target = yb[b,t]
+    return context, target
 
 def simple_encoding(text, device):
     chars = sorted(list(set(text)))
@@ -41,6 +52,9 @@ def byte_pair_encoding(device):
     decode = lambda x: torch.Tensor(enc.decode(x)).to(device)
     # return vocabulary size, encoding and decoding functions
     return enc.n_vocab, encode, decode
+
+def train_test_split(data, train_percent):
+    return sklearn.model_selection.train_test_split(data, train_size=train_percent)
 
 
 """
