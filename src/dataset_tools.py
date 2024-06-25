@@ -2,6 +2,7 @@ import sklearn.model_selection
 import torch
 import tiktoken
 import sklearn
+import torch.types
 
 def read_file(filename):
     file = "./data/" + filename
@@ -22,8 +23,8 @@ def get_batch(source, block_size, batch_size, device="cpu"):
     # source is an iterable
     # collect data from source of size block size
     ix = torch.randint(len(source) - block_size, (batch_size,))
-    x = torch.stack([source[i:i+block_size] for i in ix])
-    y = torch.stack([source[i+1:i+1+block_size] for i in ix])
+    x: torch.IntTensor = torch.stack([source[i:i+block_size] for i in ix])#.to(torch.int32)
+    y: torch.IntTensor = torch.stack([source[i+1:i+1+block_size] for i in ix])#.to(torch.int32)
     return x.to(device), y.to(device)
 
 def get_context_target(xb, yb, block_size, batch_size):
@@ -48,8 +49,8 @@ def simple_encoding(text, device):
 def byte_pair_encoding(device):
     # get encoding model
     enc = tiktoken.encoding_for_model("gpt-4")
-    encode = lambda x: torch.Tensor(enc.encode(x)).to(device)
-    decode = lambda x: torch.Tensor(enc.decode(x)).to(device)
+    encode = lambda x: torch.tensor(enc.encode(x)).to(device)
+    decode = lambda x: enc.decode(x)
     # return vocabulary size, encoding and decoding functions
     return enc.n_vocab, encode, decode
 
