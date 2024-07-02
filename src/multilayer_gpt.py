@@ -6,11 +6,6 @@ import time
 
 """_summary_
 """
-def count_params(model):
-    return sum(p.numel() for p in model.parameters() if p.requires_grad)
-
-"""_summary_
-"""
 def generate_square_mask(size):
     # create a mask to prevent attention to future positions
     mask = (torch.triu(torch.ones(size, size)) == 1).transpose(0, 1)

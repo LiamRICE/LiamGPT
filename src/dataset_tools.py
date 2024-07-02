@@ -4,6 +4,16 @@ import tiktoken
 import sklearn
 import torch.types
 
+"""_summary_
+"""
+def count_params(model):
+    num_bils = get_num_params(model) // 1000000000
+    num_hundred_mils = get_num_params(model) // 100000000 - num_bils * 10
+    return str(num_bils)+"."+str(num_hundred_mils)+"B"
+
+def get_num_params(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
 def read_file(filename):
     file = "./data/" + filename
     text = ""
