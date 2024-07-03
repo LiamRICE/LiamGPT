@@ -2,6 +2,7 @@ import torch
 from torch.nn import Transformer
 import torch.functional as F
 import dataset_tools as utils
+from datasets import load_dataset
 
 # parameters
 d_model = 1024
@@ -65,12 +66,39 @@ def train(train, test, model, num_epochs=1, max_iters=100, learning_rate=1e-4, b
             
             if step % progress == 0: eval_loss().item()
         # save model
-        torch.save(model, "models/liamgpt_"+num_params+"_e"+e)
+        torch.save(model, "models/liamgpt_"+num_params+"_e"+epoch)
 
 
 
 # GET DATA
+ds = load_dataset("Salesforce/wikitext", "wikitext-103-v1")
+train = ds["train"]["text"]
+test = ds["test"]["text"]
+val = ds["validation"]["text"]
 
+# Encoding (bpe)
+n_vocab, encoder, decoder = utils.byte_pair_encoding(device)
+
+train_data = []
+#for line in train:
+#    train_data.append(encoder(line))
+test_data = []
+for line in test:
+    test_data.append(encoder(line))
+val_data = []
+for line in val:
+    val_data.append(encoder(line))
+
+# create tensors
+#train = torch.Tensor(train_data, torch.int32, device)
+test = torch.Tensor(test_data, device)
+print(test)
+
+# deallocate memory
+train_data = 0
+test_data = 0
+
+print(utils.get_batch(train, 4, 1024, device))
 
 # train model
-train()
+#train()
